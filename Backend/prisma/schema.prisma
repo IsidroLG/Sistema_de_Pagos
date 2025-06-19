@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Trabajador {
+  id                    Int      @id @default(autoincrement())
+  idTrabajadorEmpresa   Int      @unique
+  nombreApellidos       String
+  carnetIdentidad       String   @unique
+  direccionParticular   String?
+  fechaAlta             DateTime?
+  fuenteProcedencia     String?
+  fechaBaja             DateTime?
+  rol                   String?
+  fechaIngreso          DateTime?
+  jubiladoRecontratado  Boolean
+  madresTrabajadoras    Boolean
+
+  // Relación con UEB
+  ueb         UEB     @relation(fields: [uebId], references: [id])
+  uebId       Int
+
+  cargo       Cargo?
+  salario     Salario?
+  talla       Talla?
+}
+
+model UEB {
+  id           Int           @id @default(autoincrement())
+  nombre       String        @unique
+  trabajadores Trabajador[]
+}
+
+model Cargo {
+  id                  Int         @id @default(autoincrement())
+  trabajador          Trabajador  @relation(fields: [trabajadorId], references: [id])
+  trabajadorId        Int         @unique
+  organoCargo         String?
+  categoriaOcupacion  String?
+  funcionDesignacion  String?
+  nivelPreparacion    String?
+  titulo              String?
+  tipoContrato        String?
+  tridente            String?
+  ubicacionFuerza     String?
+  nivelEscolar        String?
+  defensa             String?
+  raza                String?
+  militancia          String?
+  grupoEscala         String?
+  grupoEscalaN        Int?
+}
+
+model Salario {
+  id                Int         @id @default(autoincrement())
+  trabajador        Trabajador  @relation(fields: [trabajadorId], references: [id])
+  trabajadorId      Int         @unique
+  salarioTotal      Float?
+  escala            Float?
+  cla               Float?
+  turnos            Float?
+  maestriaDoctorado Float?
+  anosServicio      Int?
+  otros             String?
+}
+
+model Talla {
+  id            Int         @id @default(autoincrement())
+  trabajador    Trabajador  @relation(fields: [trabajadorId], references: [id])
+  trabajadorId  Int         @unique
+  pantalonSaya  Int?
+  camisaBlusa   String?
+  calzado       Int?
+  overol        String?
+}
+
