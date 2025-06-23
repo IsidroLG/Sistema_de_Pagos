@@ -133,11 +133,14 @@ export const actualizarTrabajador = async (req, res) => {
 export const eliminarTrabajador = async (req, res) => {
     try {
         const { id } = req.params;
+
         await prisma.trabajador.delete({
             where: { id: Number(id) }
         });
+
         res.json({ mensaje: 'Trabajador eliminado con éxito' });
     } catch (error) {
+        console.error(error);
         res.status(400).json({ error: 'Error al eliminar el trabajador' });
     }
 };

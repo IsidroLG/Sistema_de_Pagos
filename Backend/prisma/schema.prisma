@@ -14,58 +14,61 @@ datasource db {
 }
 
 model Trabajador {
-  id                    Int      @id @default(autoincrement())
-  idTrabajadorEmpresa   Int      @unique
-  nombreApellidos       String
-  carnetIdentidad       String   @unique
-  direccionParticular   String?
-  fechaAlta             DateTime?
-  fuenteProcedencia     String?
-  fechaBaja             DateTime?
-  rol                   String?
-  fechaIngreso          DateTime?
-  jubiladoRecontratado  Boolean
-  madresTrabajadoras    Boolean
+  id                   Int       @id @default(autoincrement())
+  idTrabajadorEmpresa  Int       @unique
+  nombreApellidos      String
+  carnetIdentidad      String    @unique
+  direccionParticular  String?
+  fechaAlta            DateTime?
+  fuenteProcedencia    String?
+  fechaBaja            DateTime?
+  rol                  String?
+  fechaIngreso         DateTime?
+  jubiladoRecontratado Boolean
+  madresTrabajadoras   Boolean
 
-  // Relación con UEB
-  ueb         UEB     @relation(fields: [uebId], references: [id])
-  uebId       Int
+  // Relación
+  ueb   UEB @relation(fields: [uebId], references: [id])
+  uebId Int
 
-  cargo       Cargo?
-  salario     Salario?
-  talla       Talla?
+  cargo          Cargo?
+  salario        Salario?
+  talla          Talla?
+  historialPagos HistorialPago[]
+  usuario        Usuario?
+  ieds IED[]
 }
 
 model UEB {
-  id           Int           @id @default(autoincrement())
-  nombre       String        @unique
+  id           Int          @id @default(autoincrement())
+  nombre       String       @unique
   trabajadores Trabajador[]
 }
 
 model Cargo {
-  id                  Int         @id @default(autoincrement())
-  trabajador          Trabajador  @relation(fields: [trabajadorId], references: [id])
-  trabajadorId        Int         @unique
-  organoCargo         String?
-  categoriaOcupacion  String?
-  funcionDesignacion  String?
-  nivelPreparacion    String?
-  titulo              String?
-  tipoContrato        String?
-  tridente            String?
-  ubicacionFuerza     String?
-  nivelEscolar        String?
-  defensa             String?
-  raza                String?
-  militancia          String?
-  grupoEscala         String?
-  grupoEscalaN        Int?
+  id                 Int        @id @default(autoincrement())
+  trabajador         Trabajador @relation(fields: [trabajadorId], references: [id])
+  trabajadorId       Int        @unique
+  organoCargo        String?
+  categoriaOcupacion String?
+  funcionDesignacion String?
+  nivelPreparacion   String?
+  titulo             String?
+  tipoContrato       String?
+  tridente           String?
+  ubicacionFuerza    String?
+  nivelEscolar       String?
+  defensa            String?
+  raza               String?
+  militancia         String?
+  grupoEscala        String?
+  grupoEscalaN       Int?
 }
 
 model Salario {
-  id                Int         @id @default(autoincrement())
-  trabajador        Trabajador  @relation(fields: [trabajadorId], references: [id])
-  trabajadorId      Int         @unique
+  id                Int        @id @default(autoincrement())
+  trabajador        Trabajador @relation(fields: [trabajadorId], references: [id])
+  trabajadorId      Int        @unique
   salarioTotal      Float?
   escala            Float?
   cla               Float?
@@ -75,13 +78,51 @@ model Salario {
   otros             String?
 }
 
-model Talla {
-  id            Int         @id @default(autoincrement())
-  trabajador    Trabajador  @relation(fields: [trabajadorId], references: [id])
-  trabajadorId  Int         @unique
-  pantalonSaya  Int?
-  camisaBlusa   String?
-  calzado       Int?
-  overol        String?
+model HistorialPago {
+  id           Int        @id @default(autoincrement())
+  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
+  trabajadorId Int
+
+  mes            Int // 1 a 12
+  anio           Int // ej. 2025
+  salarioBase    Float
+  pagoResultados Float
+  pagoUtilidades Float
+  creadoEn       DateTime @default(now())
+
+  @@unique([trabajadorId, mes, anio]) // evita duplicados por mes
 }
 
+model Talla {
+  id           Int        @id @default(autoincrement())
+  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
+  trabajadorId Int        @unique
+  pantalonSaya Int?
+  camisaBlusa  String?
+  calzado      Int?
+  overol       String?
+}
+
+model Usuario {
+  id           Int         @id @default(autoincrement())
+  username     String      @unique
+  password     String
+  rol          String // 'admin' o 'usuario'
+  trabajador   Trabajador? @relation(fields: [trabajadorId], references: [id])
+  trabajadorId Int?        @unique // 👈 necesario para que la relación sea uno a uno
+}
+
+model IED {
+  id             Int         @id @default(autoincrement())
+  trabajador     Trabajador  @relation(fields: [trabajadorId], references: [id])
+  trabajadorId   Int
+
+  mes            Int?        // 1–12, para IED mensual (opcional)
+  trimestre      Int?        // 1–4, para IED trimestral (opcional)
+  anio           Int         // requerido para todos
+  tipo           String      // 'mensual', 'trimestral', 'anual'
+  valor          Float       // entre 0.0 y 1.0
+  creadoEn       DateTime    @default(now())
+
+  @@unique([trabajadorId, tipo, mes, trimestre, anio])
+}
