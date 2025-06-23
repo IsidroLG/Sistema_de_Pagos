@@ -36,7 +36,7 @@ model Trabajador {
   talla          Talla?
   historialPagos HistorialPago[]
   usuario        Usuario?
-  ieds IED[]
+  ieds           IED[]
 }
 
 model UEB {
@@ -104,25 +104,28 @@ model Talla {
 }
 
 model Usuario {
-  id           Int         @id @default(autoincrement())
-  username     String      @unique
-  password     String
-  rol          String // 'admin' o 'usuario'
+  id       Int     @id @default(autoincrement())
+  username String  @unique
+  password String? // solo requerido para 'admin'
+  rol      String // 'admin' o 'usuario'
+
   trabajador   Trabajador? @relation(fields: [trabajadorId], references: [id])
-  trabajadorId Int?        @unique // 👈 necesario para que la relación sea uno a uno
+  trabajadorId Int?        @unique // obligatorio si es 'usuario'
+
+  creadoEn DateTime @default(now())
 }
 
 model IED {
-  id             Int         @id @default(autoincrement())
-  trabajador     Trabajador  @relation(fields: [trabajadorId], references: [id])
-  trabajadorId   Int
+  id           Int        @id @default(autoincrement())
+  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
+  trabajadorId Int
 
-  mes            Int?        // 1–12, para IED mensual (opcional)
-  trimestre      Int?        // 1–4, para IED trimestral (opcional)
-  anio           Int         // requerido para todos
-  tipo           String      // 'mensual', 'trimestral', 'anual'
-  valor          Float       // entre 0.0 y 1.0
-  creadoEn       DateTime    @default(now())
+  mes       Int? // 1–12, para IED mensual (opcional)
+  trimestre Int? // 1–4, para IED trimestral (opcional)
+  anio      Int // requerido para todos
+  tipo      String // 'mensual', 'trimestral', 'anual'
+  valor     Float // entre 0.0 y 1.0
+  creadoEn  DateTime @default(now())
 
   @@unique([trabajadorId, tipo, mes, trimestre, anio])
 }
