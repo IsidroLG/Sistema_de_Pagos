@@ -79,3 +79,30 @@ export const registrarAdmin = async (req, res) => {
         res.status(500).json({ error: 'Error al crear administrador' })
     }
 }
+
+// controllers/authController.js
+export const cambiarPassword = async (req, res) => {
+    const { username, actualPassword, nuevaPassword } = req.body
+
+    const usuario = await prisma.usuario.findUnique({ where: { username } })
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' })
+
+    // Validación dependiendo del rol
+    let esValido
+    if (usuario.rol === 'admin') {
+        esValido = await bcrypt.compare(actualPassword, usuario.password)
+    } else {
+        esValido = usuario.password === actualPassword
+    }
+
+    if (!esValido) return res.status(401).json({ error: 'Contraseña actual incorrecta' })
+
+    const nuevaHash = await bcrypt.hash(nuevaPassword, 10)
+
+    await prisma.usuario.update({
+        where: { username },
+        data: { password: nuevaHash }
+    })
+
+    res.json({ mensaje: 'Contraseña actualizada correctamente' })
+}

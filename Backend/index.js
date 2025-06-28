@@ -7,6 +7,8 @@ import historialPagoRoutes from './routes/historialPagos.js';
 import utilidadesRoutes from './routes/utilidades.js'
 import authRoutes from './routes/auth.js'
 import { verificarToken } from './middlewares/verificarToken.js'
+import usuarioRoutes from './routes/usuario.js'
+import perfilRoutes from './routes/perfil.js'
 
 
 dotenv.config();
@@ -20,6 +22,9 @@ app.use('/auth', authRoutes)
 app.get('/ruta-protegida', verificarToken, (req, res) => {
     res.send(`Hola usuario ${req.usuario.id} con rol ${req.usuario.rol}`)
 })
+app.use('/usuarios', usuarioRoutes)
+app.use('/mi-perfil', perfilRoutes)
+
 app.use('/trabajadores', trabajadoresRoutes);
 app.use('/ueb', uebRoutes);
 app.use('/pagos', historialPagoRoutes);

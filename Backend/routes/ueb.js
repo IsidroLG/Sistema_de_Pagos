@@ -6,13 +6,15 @@ import {
     actualizarUEB,
     eliminarUEB
 } from '../controllers/uebController.js';
+import { isAdmin } from '../middlewares/isAdmin.js';
+import { verificarToken } from '../middlewares/verificarToken.js';
 
 const router = express.Router();
 
-router.post('/', crearUEB);
-router.get('/', listarUEBs);
-router.get('/:id', obtenerUEB);
-router.put('/:id', actualizarUEB);
-router.delete('/:id', eliminarUEB);
+router.post('/crearUEB',verificarToken, isAdmin ,crearUEB);
+router.get('/listarUEBs',verificarToken,isAdmin ,listarUEBs);
+router.get('/obtenerUEB/:id',verificarToken,isAdmin , obtenerUEB);
+router.put('/actualizarUEB/:id',verificarToken, isAdmin ,actualizarUEB);
+router.delete('/eliminarUEB/:id',verificarToken,isAdmin , eliminarUEB);
 
 export default router;

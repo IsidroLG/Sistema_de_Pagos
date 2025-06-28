@@ -6,13 +6,15 @@ import {
     actualizarPago,
     eliminarPago
 } from '../controllers/historialPagosController.js';
+import { isAdmin } from '../middlewares/isAdmin.js';
+import { verificarToken } from '../middlewares/verificarToken.js';
 
 const router = express.Router();
 
-router.post('/:trabajadorId', crearPago);
-router.get('/:trabajadorId', obtenerHistorial);
-router.get('/:trabajadorId/:anio/:mes', obtenerPagoPorMes);
-router.put('/:trabajadorId/:anio/:mes', actualizarPago);
-router.delete('/:trabajadorId/:anio/:mes', eliminarPago);
+router.post('/crearPago:trabajadorId',verificarToken,isAdmin, crearPago);
+router.get('/obtenerHistorial:trabajadorId',verificarToken, obtenerHistorial);
+router.get('/obtenerPagoPorMes:trabajadorId/:anio/:mes',verificarToken, obtenerPagoPorMes);
+router.put('/actualizarPago:trabajadorId/:anio/:mes',verificarToken,isAdmin , actualizarPago);
+router.delete('/eliminarPago:trabajadorId/:anio/:mes',verificarToken, isAdmin ,eliminarPago);
 
 export default router;

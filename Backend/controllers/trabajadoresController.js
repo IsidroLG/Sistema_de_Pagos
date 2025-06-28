@@ -65,8 +65,14 @@ export const crearTrabajador = async (req, res) => {
         });
 
         res.status(201).json(nuevo);
+        
     } catch (error) {
         console.error(error);
+        if (error.code === 'P2002') {
+            return res.status(400).json({
+                error: `Ya existe un trabajador con el idTrabajadorEmpresa: ${req.body.idTrabajadorEmpresa}`
+            })
+        }
         res.status(400).json({ error: 'Error al crear el trabajador y sus relaciones' });
     }
 };
@@ -128,6 +134,43 @@ export const actualizarTrabajador = async (req, res) => {
         res.status(400).json({ error: 'Error al actualizar el trabajador y sus relaciones' });
     }
 };
+//importar trabajadores
+export const importarTrabajadores = async (req, res) => {
+    const trabajadores = req.body
+
+    if (!Array.isArray(trabajadores) || trabajadores.length === 0) {
+        return res.status(400).json({ error: 'No se enviaron trabajadores válidos' })
+    }
+
+    let creados = 0
+    const errores = []
+
+    for (const t of trabajadores) {
+        const { cargo, salario, talla, uebId, ...datosTrabajador } = t
+
+        try {
+            await prisma.trabajador.create({
+                data: {
+                    ...datosTrabajador,
+                    ueb: { connect: { id: uebId } },
+                    cargo: cargo ? { create: cargo } : undefined,
+                    salario: salario ? { create: salario } : undefined,
+                    talla: talla ? { create: talla } : undefined
+                }
+            })
+            creados++
+        } catch (err) {
+            errores.push({ trabajador: t.nombreApellidos || 'Desconocido', error: err.message })
+        }
+    }
+
+    res.json({
+        mensaje: `✅ Importación finalizada`,
+        trabajadoresCreados: creados,
+        conErrores: errores.length,
+        detallesErrores: errores
+    })
+}
 
 // Eliminar un trabajador
 export const eliminarTrabajador = async (req, res) => {

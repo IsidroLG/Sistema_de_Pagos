@@ -4,15 +4,17 @@ import {
     obtenerTrabajador,
     crearTrabajador,
     actualizarTrabajador,
-    eliminarTrabajador
+    eliminarTrabajador,
+    importarTrabajadores
 } from '../controllers/trabajadoresController.js';
-
+import { isAdmin } from '../middlewares/isAdmin.js';
+import { verificarToken } from '../middlewares/verificarToken.js';
 const router = express.Router();
 
-router.get('/', obtenerTrabajadores);
-router.get('/:id', obtenerTrabajador);
-router.post('/', crearTrabajador);
-router.put('/:id', actualizarTrabajador);
-router.delete('/:id', eliminarTrabajador);
-
+router.get('/all', verificarToken, isAdmin, obtenerTrabajadores)
+router.get('/obtenerTrabajador/:id', verificarToken, isAdmin, obtenerTrabajador)
+router.post('/crearTrabajador', verificarToken, isAdmin, crearTrabajador)
+router.put('/actualizarTrabajador/:id', verificarToken, isAdmin, actualizarTrabajador)
+router.delete('/eliminarTrabajador/:id', verificarToken, isAdmin, eliminarTrabajador)
+router.post('/importar', verificarToken, isAdmin, importarTrabajadores)
 export default router;
